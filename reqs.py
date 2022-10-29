@@ -20,3 +20,19 @@ def register_user(user_info: dict[str, str]) -> requests.Response:
     data = json.dumps(user_info)
     register_response = requests.post(base_url + user_endpoint, data=data)
     return register_response
+
+
+def remove_user(username: str, password: str) -> requests.Response:
+    """Deletes the user information given in the authentication data"""
+
+    remove_response = requests.delete(base_url + user_endpoint, auth=(username, password))
+    return remove_response
+
+
+def update_password(username: str, password: str, new_password: str) -> requests.Response:
+    """Updates the user information given in the authentication data"""
+
+    data = {"password": new_password}
+    data = json.dumps(data)
+    update_response = requests.put(base_url + user_endpoint, auth=(username, password), data=data)
+    return update_response

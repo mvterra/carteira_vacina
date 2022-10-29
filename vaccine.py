@@ -1,20 +1,91 @@
-import functools
-import hashlib
-import hmac
 import re
 import sys
 import os
 import traceback
-import pandas as pd
 from PyQt5.uic import loadUi
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QMessageBox, QDesktopWidget
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QMessageBox, QDesktopWidget, QLineEdit
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5 import QtCore, QtGui, QtWidgets
-import mysql.connector
 from path import *
 import datetime
 from icon import vacina
 from reqs import *
+
+
+class ChangePasswordWindow(QWidget):
+    teste_signal = QtCore.pyqtSignal(str)
+
+    def __init__(self, username, password):
+        super().__init__()
+        self.activateWindow()
+        loadUi(change_password_window_path, self)
+        self.username = username
+        self.password = password
+        self.connect_buttons()
+        self.line_current_password.setText("")
+        self.line_current_password.focusWidget()
+        self.line_current_password.setFocus()
+        self.configure_ui()
+
+    def emit_updated_password(self):
+        self.teste_signal.emit(self.password)
+
+    def configure_ui(self):
+        self.setWindowTitle("Alterar senha")
+        self.setWindowIcon(QtGui.QIcon("icon/vacina.png"))
+        self.line_current_password.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.line_new_password.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.line_confirm_password.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.line_current_password.setFocus()
+
+    def check_password(self):
+        current_password = self.line_current_password.text()
+        new_password = self.line_new_password.text()
+        confirm_password = self.line_confirm_password.text()
+
+        if current_password != self.password:
+            error_message("senha", "Senha atual inválida")
+            return False
+
+        elif current_password == new_password:
+            error_message("senha", "Senha atual igual a nova senha")
+            return False
+
+        elif " " in new_password or new_password == "":
+            error_message("senha", "Senha inválida")
+            return False
+
+        elif new_password != confirm_password:
+            error_message("senha", "Nova senha diferente da confirmação")
+            return False
+
+        return True
+
+    def change_password(self):
+        new_password = self.line_new_password.text()
+        valid_password = self.check_password()
+
+        if valid_password is True:
+            update_response = update_password(self.username,self.password,new_password)
+            if update_response.ok:
+                notification_message("alteração", "Senha alterada com sucesso")
+                self.password = new_password
+                self.emit_updated_password()
+            else:
+                error_message("erro", "Não foi possível alterar a senha, tente novamente")
+
+    def connect_buttons(self):
+        self.button_cancel.clicked.connect(self.close)
+        self.button_change.clicked.connect(self.change_password)
+
+    def display_info(self):
+        try:
+            self.setWindowModality(Qt.ApplicationModal)
+            self.setFocus()
+            self.show()
+
+        except:
+            print(traceback.format_exc())
 
 
 class RegisterForm(QWidget):
@@ -22,6 +93,8 @@ class RegisterForm(QWidget):
         super().__init__()
         loadUi(register_form_path, self)
         self.connect_buttons()
+        self.setWindowTitle("Cadastrar usuário")
+        self.setWindowIcon(QtGui.QIcon("icon/vacina.png"))
         self.line_register_password.setEchoMode(QtWidgets.QLineEdit.Password)
 
     def connect_buttons(self):
@@ -140,7 +213,8 @@ class RegisterForm(QWidget):
                 del self.email
                 del self.birth
                 del self.password
-                self.close()
+                #Alterar
+                # self.close()
 
         except:
             print(traceback.format_exc())
@@ -221,10 +295,9 @@ class LoginForm(QWidget):
                 return
 
             self.check_remember_user()
-            print("ok")
-            # main_window = MainWindow(user_info)
-            # main_window.show()
-            # self.close()
+            self.main_window = MainWindow(input_user, input_password)
+            self.main_window.show()
+            self.close()
 
         except:
             print(traceback.format_exc())
@@ -233,6 +306,40 @@ class LoginForm(QWidget):
         self.line_password.clear()
         self.line_user.setFocus()
         self.line_user.selectAll()
+
+
+class MainWindow(QMainWindow):
+    def __init__(self, username, password):
+        super().__init__()
+        loadUi(main_window_path, self)
+        self.setWindowIcon(QtGui.QIcon("icon/vacina.png"))
+        self.username = username
+        self.password = password
+        self.change_password_window = ChangePasswordWindow(username, password)
+        self.change_password_window.teste_signal.connect(self.update_main_window_password)
+        # self.delete_user_window = DeleteUserWindow()
+        self.connect_buttons()
+
+    def update_main_window_password(self, val):
+        self.password = val
+
+    def connect_buttons(self):
+        self.menu_change_user.triggered.connect(self.change_user)
+        self.sep_change_password.triggered.connect(self.change_password_window.display_info)
+        # self.sep_delete_user.triggered.connect(self.delete_user)
+
+    def change_user(self):
+        confirmation = notification_message("troca de usuário", "Realmente deseja trocar de usuário?")
+        if confirmation == QMessageBox.Ok:
+            self.close()
+            main_window.clear_password()
+            main_window.show()
+
+    def change_password(self):
+        pass
+
+    def delete_user(self):
+        pass
 
 
 def set_focus_startup(window):
@@ -254,7 +361,7 @@ def notification_message(message_title, message_text):
     message = QtWidgets.QMessageBox()
     message.setWindowTitle(message_title)
     message.setText(message_text)
-    message.setStandardButtons(QMessageBox.Ok)
+    message.setStandardButtons(QMessageBox.Cancel | QMessageBox.Ok)
     message.setIcon(QtWidgets.QMessageBox.Information)
     confirmation = message.exec_()
     return confirmation
