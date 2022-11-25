@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>584</width>
+    <height>623</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Carteira de vacinação</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget#centralwidget {
+	
+	background-color: rgb(69, 159, 255);
+}
+
+QMenuBar {
+            background-color: rgb(69, 159, 255);
+            color: rgb(255,255,255);
+}
+QTabWidget {
+ background-color: rgb(69, 159, 255);
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="tab">
+      <property name="styleSheet">
+       <string notr="true">QTabWidget::pane { border: 0; };</string>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab_available_vacs">
+       <property name="styleSheet">
+        <string notr="true">QWidget#tab_available_vacs{background-color: rgb(69, 159, 255);}</string>
+       </property>
+       <attribute name="title">
+        <string>Vacinas disponíveis</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="0">
+         <widget class="QWidget" name="div_superior_down" native="true">
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="0">
+            <widget class="QTableWidget" name="table_all_vacs">
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="sortingEnabled">
+              <bool>true</bool>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+             <attribute name="horizontalHeaderStretchLastSection">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="verticalHeaderVisible">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="verticalHeaderStretchLastSection">
+              <bool>false</bool>
+             </attribute>
+             <column>
+              <property name="text">
+               <string>Vacina</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Número de doses</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Observação</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_insert_vac">
+       <property name="styleSheet">
+        <string notr="true">QWidget #tab_insert_vac{background-color: rgb(69, 159, 255); border:0;}</string>
+       </property>
+       <attribute name="title">
+        <string>Vacinas do usuário</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QWidget" name="div_superior_up" native="true">
+          <property name="maximumSize">
+           <size>
+            <width>16000</width>
+            <height>16000</height>
+           </size>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="0" column="0">
+            <widget class="QTableWidget" name="table_user_vacs">
+             <attribute name="verticalHeaderVisible">
+              <bool>false</bool>
+             </attribute>
+             <column>
+              <property name="text">
+               <string>Vacina</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Data</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QWidget" name="div_inferior_up" native="true">
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="0">
+            <widget class="QPushButton" name="button_register_vac">
+             <property name="minimumSize">
+              <size>
+               <width>150</width>
+               <height>40</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>40</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Arial</family>
+               <pointsize>12</pointsize>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QPushButton {
+background-color: rgb(0, 136, 255);
+border-radius:3px;
+color: rgb(255, 255, 255);
+}
+
+QPushButton:focus {
+outline:0
+}
+
+QPushButton:hover {
+background-color:rgb(0, 145, 255);
+transition: 1s;
+}
+
+QPushButton:pressed {
+background-color:rgb(0, 110, 240);
+}
+</string>
+             </property>
+             <property name="text">
+              <string>Registrar vacina</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>584</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuMenu">
+    <property name="title">
+     <string>Menu</string>
+    </property>
+    <widget class="QMenu" name="menuConfigure">
+     <property name="title">
+      <string>Configuração</string>
+     </property>
+     <addaction name="sep_change_password"/>
+     <addaction name="sep_delete_user"/>
+    </widget>
+    <addaction name="separator"/>
+    <addaction name="menuConfigure"/>
+    <addaction name="menu_change_user"/>
+   </widget>
+   <addaction name="menuMenu"/>
+  </widget>
+  <action name="sep_change_password">
+   <property name="text">
+    <string>Alterar senha...</string>
+   </property>
+  </action>
+  <action name="sep_delete_user">
+   <property name="text">
+    <string>Deletar usuário...</string>
+   </property>
+  </action>
+  <action name="sep_config_user">
+   <property name="text">
+    <string>User info...</string>
+   </property>
+  </action>
+  <action name="menu_change_user">
+   <property name="text">
+    <string>Mudar usuário...</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -11,6 +11,7 @@ login_form_path = f"{interface_path}/login_form.ui"
 register_form_path = f"{interface_path}/register_form.ui"
 main_window_path = f"{interface_path}/main_window.ui"
 change_password_window_path = f"{interface_path}/change_password_window.ui"
+register_vac_path = f"{interface_path}/register_vac_form.ui"
 
 user = config_parser["remember_user"]["user"]
 remember = config_parser['remember_user']['remember']

@@ -1,15 +1,61 @@
 import re
 import sys
 import os
+import pandas as pd
 import traceback
 from PyQt5.uic import loadUi
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QMessageBox, QDesktopWidget, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QMessageBox, QDesktopWidget, QLineEdit, QTableWidget, QTableWidgetItem, QComboBox
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5 import QtCore, QtGui, QtWidgets
 from path import *
 import datetime
 from icon import vacina
 from reqs import *
+
+
+class RegisterVacWIndow(QWidget):
+    registered_vac_signal = QtCore.pyqtSignal()
+
+    def __init__(self, username, password, vac_df):
+        super().__init__()
+        self.activateWindow()
+        loadUi(register_vac_path, self)
+        self.vac_df = vac_df
+        self.username = username
+        self.password = password
+        self.connect_buttons()
+        self.configure_ui()
+
+    def update_user_vac_table(self):
+        self.registered_vac_signal.emit()
+
+    def configure_ui(self):
+        self.setWindowTitle("Registrar vacina")
+        self.setWindowIcon(QtGui.QIcon("icon/vacina.png"))
+        self.combo_vac.addItems(self.vac_df['name'].to_list())
+        # self.combo_vac.addItems(vac_df[])
+
+    def connect_buttons(self):
+        self.button_register_vac.clicked.connect(self.register_vac)
+
+    def register_vac(self):
+        vac_name = self.combo_vac.currentText()
+        vac_id = self.vac_df.query(f"name == '{vac_name}'")['vac_id'].item()
+        date = self.line_vac_date.text()
+        successful_register = register_vac(user_info=(self.username, self.password), vac_info={"vac_id": vac_id, "date_taken": date}).status_code
+        if successful_register == 200:
+            self.registered_vac_signal.emit()
+        else:
+            notification_message("Registro de vacina", "Não foi possível registrar vacina, tente novamente")
+
+    def display_info(self):
+        try:
+            self.setWindowModality(Qt.ApplicationModal)
+            self.setFocus()
+            self.show()
+
+        except:
+            print(traceback.format_exc())
 
 
 class ChangePasswordWindow(QWidget):
@@ -213,8 +259,7 @@ class RegisterForm(QWidget):
                 del self.email
                 del self.birth
                 del self.password
-                #Alterar
-                # self.close()
+                self.close()
 
         except:
             print(traceback.format_exc())
@@ -317,8 +362,18 @@ class MainWindow(QMainWindow):
         self.password = password
         self.change_password_window = ChangePasswordWindow(username, password)
         self.change_password_window.teste_signal.connect(self.update_main_window_password)
-        # self.delete_user_window = DeleteUserWindow()
+        self.load_available_vacs()
+        self.register_vac_window = RegisterVacWIndow(username, password, self.vac_df)
+        self.register_vac_window.registered_vac_signal.connect(self.update_user_vac_table)
+        self.table_all_vacs.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        self.table_all_vacs.horizontalHeader().setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        self.table_user_vacs.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        self.table_user_vacs.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         self.connect_buttons()
+
+    def update_user_vac_table(self):
+        self.table_user_vacs.setRowCount(0)
+        self.load_user_vacs()
 
     def update_main_window_password(self, val):
         self.password = val
@@ -326,7 +381,8 @@ class MainWindow(QMainWindow):
     def connect_buttons(self):
         self.menu_change_user.triggered.connect(self.change_user)
         self.sep_change_password.triggered.connect(self.change_password_window.display_info)
-        # self.sep_delete_user.triggered.connect(self.delete_user)
+        self.sep_delete_user.triggered.connect(self.delete_user)
+        self.button_register_vac.clicked.connect(self.register_vac_window.display_info)
 
     def change_user(self):
         confirmation = notification_message("troca de usuário", "Realmente deseja trocar de usuário?")
@@ -335,11 +391,46 @@ class MainWindow(QMainWindow):
             main_window.clear_password()
             main_window.show()
 
-    def change_password(self):
-        pass
-
     def delete_user(self):
-        pass
+        confirm_deletion = notification_message("usuário", "Realmente deseja excluir o usuário?")
+        if confirm_deletion == QMessageBox.Ok:
+            remove_user(self.username, self.password)
+            self.close()
+            main_window.show()
+            del self
+
+    def load_available_vacs(self):
+        vac_list = get_all_vaccines().text
+        vac_list = json.loads(vac_list)
+        self.vac_df = pd.DataFrame(vac_list)
+        self.table_all_vacs.setRowCount(len(vac_list))
+        for index, row in enumerate(vac_list):
+            vac_id = str(row['vac_id'])
+            name = str(row['name'])
+            obs = str(row['obs'])
+            num_doses = str(row['num_doses'])
+            self.table_all_vacs.setItem(index, 0, QTableWidgetItem(name))
+            self.table_all_vacs.setItem(index, 1, QTableWidgetItem(num_doses))
+            self.table_all_vacs.setItem(index, 2, QTableWidgetItem(obs))
+        self.load_user_vacs()
+
+    def load_user_vacs(self):
+        user_vacs = get_user_vaccines(self.username, self.password).text
+        user_vacs = json.loads(user_vacs)
+
+        self.table_user_vacs.setRowCount(len(user_vacs))
+        for index, vac_row in enumerate(user_vacs):
+            vac_id = vac_row['vac_id']
+            df_row = self.vac_df.query(f"vac_id == {vac_id}")
+            vac_name = df_row['name'].item()
+            date = vac_row['date_taken']
+            vac_item = QTableWidgetItem(vac_name)
+            vac_item.setTextAlignment(Qt.AlignCenter)
+            date_item = QTableWidgetItem(date)
+            date_item.setTextAlignment(Qt.AlignCenter)
+
+            self.table_user_vacs.setItem(index, 0, vac_item)
+            self.table_user_vacs.setItem(index, 1, date_item)
 
 
 def set_focus_startup(window):
