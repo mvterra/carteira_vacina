@@ -6,9 +6,7 @@ PJI310 - Sala 001 - Grupo 011
 
 ## O projeto:
 
-O conceito que explorado neste projeto foi o de uma plataforma de carteiras de
-vacinação virtuais, em que o banco de dados armazena os dados dos usuários,
-das vacinas e com quais doses de quais vacinas cada usuário foi vacinado.
+O conceito que explorado neste projeto foi o de uma plataforma de carteiras de vacinação virtuais, em que o banco de dados armazena os dados dos usuários, das vacinas e com quais doses de quais vacinas cada usuário foi vacinado.
 
 
 ## O aplicativo:
