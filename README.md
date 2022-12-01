@@ -23,3 +23,8 @@ As partes principais do aplicativo são as abas de vacinas disponíveis, na qual
 são oferecidas pelo SUS, o número de doses e observações e a aba de vacinas do usuário. Nessa última é possível
 conferir todas as vacinas já tomadas pelo usuário e a data. Por fim, no botão "Registrar vacina" o usuário
 escolhe qual vacina foi tomada (a partir das vacinas já apresentadas) e a data para fazer o registro.
+
+## Backend:
+
+O backend do aplicativo foi construído utilizando a linguagem de programação Go e todas as informações
+são disponibilizadas no seguinte repositório: https://github.com/ricardo-ayres/vaxapi
